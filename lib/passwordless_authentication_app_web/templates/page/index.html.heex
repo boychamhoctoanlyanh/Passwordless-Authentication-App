@@ -1,0 +1,58 @@
+<section class="phx-hero">
+  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
+  <%= if @current_user do %>
+  <h4>You are logged in!</h4>
+  <% else %>
+  <h4>You are not logged in! Please Log In to continue.</h4>
+
+  <%= form_for @conn, Routes.auth_path(@conn, :login), fn f -> %>
+  <label> <%= text_input f, :email, placeholder: "Email" %> </label>
+  <button type="button" onclick="getCode()" id="code_submit">
+    Get login code
+  </button>
+  <label>
+    <%= text_input f, :verification_code, placeholder: "Verification Code",
+    style: "display:none" %>
+  </label>
+
+  <%= submit "Login with email code", id: "login_submit", style: "display:none"
+  %> <% end %> <% end %>
+</section>
+<script src="https://cdn.auth0.com/js/auth0/9.11/auth0.min.js"></script>
+<script type="text/javascript">
+  function getCode() {
+    const email = document.getElementById("email").value;
+    const data = {
+      client_id: "wBEDm8R20EP3xANQ4gqVvg7LXKOg0O9y",
+      client_secret:
+        "dGODegR-_kNG_mcFRdcwKJMLSZkNRKnS8LKjwQDkqsWJi5Ci6i81lqPqu1471dER",
+      connection: "email",
+      email,
+      send: "code",
+    };
+    fetch("https://dev-jirr7i9f.us.auth0.com/passwordless/start", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        console.log(response.status);
+        if (response.status === 200) {
+          document.getElementById("code_submit").style.display = "none";
+          document.getElementById("verification_code").style.display = "block";
+          document.getElementById("login_submit").style.display = "block";
+        } else {
+          alert("Failed");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+</script>
